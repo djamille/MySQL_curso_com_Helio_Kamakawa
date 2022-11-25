@@ -1,0 +1,367 @@
+/**
+Aula 02 Banco Dados Professor Helio Kamakawa
+*/
+DROP DATABASE IF EXISTS empresa_sinalizacao; -- eliminando base de dados caso exista
+
+CREATE DATABASE empresa_sinalizacao; -- criando a base de dados
+
+USE empresa_sinalizacao; -- selecionando a base em que será trabalhado
+
+DROP TABLE IF EXISTS estado;
+
+CREATE TABLE IF NOT EXISTS estado(
+id INT NOT NULL AUTO_INCREMENT -- CONSTRAINT INLINE  regras definidas na mesma linha - sem nome
+,nome VARCHAR(200) NOT NULL UNIQUE
+,sigla CHAR(2) NOT NULL UNIQUE
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- ,CHECK (ativo IN ('S', 'N'))
+,CONSTRAINT pk_estado PRIMARY KEY (id)
+,CONSTRAINT estado_ativo_deve_ser_S_ou_N CHECK (ativo IN ('S', 'N'))  -- CONSTRAINT OUT OF LINE  regras definidas fora da linha - com nome
+);
+
+SELECT * FROM estado;
+
+DROP TABLE IF EXISTS cidade;
+
+CREATE TABLE IF NOT EXISTS cidade(
+id INT NOT NULL AUTO_INCREMENT 
+,nome VARCHAR(200) NOT NULL
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,estado_id INT NOT NULL
+,CONSTRAINT pk_cidade PRIMARY KEY (id)
+,CONSTRAINT fk_cidade_estado FOREIGN KEY (estado_id) REFERENCES estado (id)
+,CONSTRAINT cidade_ativo_deve_ser_S_ou_N CHECK (ativo IN ('S', 'N'))
+,CONSTRAINT cidade_unica UNIQUE(nome, estado_id)
+);
+
+SELECT * FROM cidade;
+
+DROP TABLE IF EXISTS departamento;
+
+CREATE TABLE IF NOT EXISTS departamento(
+id INT NOT NULL AUTO_INCREMENT
+,nome VARCHAR(100) NOT NULL UNIQUE
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,CONSTRAINT pk_departamento PRIMARY KEY (id)
+,CONSTRAINT departamento_ativo_deve_ser_S_ou_N CHECK (ativo IN ('S', 'N'))
+);
+
+SELECT * FROM departamento;
+
+DROP TABLE IF EXISTS funcionario;
+
+CREATE TABLE IF NOT EXISTS funcionario(
+id INT NOT NULL AUTO_INCREMENT
+,nome VARCHAR(200) NOT NULL UNIQUE
+,CPF VARCHAR(14) NOT NULL UNIQUE
+,endereço  VARCHAR(200) NOT NULL
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,cidade_id INT NOT NULL
+,departamento_id INT NOT NULL
+,CONSTRAINT pk_funcionario PRIMARY KEY (id)
+,CONSTRAINT fk_funcionario_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id)
+,CONSTRAINT fk_funcionario_departamento FOREIGN KEY (departamento_id) REFERENCES departamento (id)
+,CONSTRAINT funcionario_ativo_deve_ser_S_ou_N CHECK (ativo IN ('S', 'N'))
+);
+
+SELECT * FROM funcionario;
+
+DROP TABLE IF EXISTS cliente;
+
+CREATE TABLE IF NOT EXISTS cliente(
+id INT NOT NULL AUTO_INCREMENT
+,nome VARCHAR(200) NOT NULL UNIQUE
+,razao_social VARCHAR(200) NOT NULL UNIQUE
+,CNPJ_CPF VARCHAR(18) NOT NULL UNIQUE
+,endereço  VARCHAR(200) NOT NULL
+,telefone VARCHAR(14) NOT NULL
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,cidade_id INT NOT NULL
+,CONSTRAINT pk_cliente PRIMARY KEY (id)
+,CONSTRAINT fk_cliente_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id)
+,CONSTRAINT cliente_ativo_deve_ser_S_ou_N CHECK (ativo IN ('S', 'N'))
+);
+
+SELECT * FROM cliente;
+
+DROP TABLE IF EXISTS fornecedor;
+
+CREATE TABLE IF NOT EXISTS fornecedor(
+id INT NOT NULL AUTO_INCREMENT
+,nome VARCHAR(200) NOT NULL UNIQUE
+,razao_social VARCHAR(200) NOT NULL UNIQUE
+,CNPJ_CPF VARCHAR(18) NOT NULL UNIQUE
+,endereço  VARCHAR(200) NOT NULL
+,telefone VARCHAR(14) NOT NULL
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,cidade_id INT NOT NULL
+,CONSTRAINT pk_fornecedor PRIMARY KEY (id)
+,CONSTRAINT fk_fornecedor_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id)
+,CONSTRAINT fornecedor_ativo_deve_ser_S_ou_N CHECK (ativo IN ('S', 'N'))
+);
+
+SELECT * FROM fornecedor;
+
+DROP TABLE IF EXISTS motorista;
+
+CREATE TABLE IF NOT EXISTS motorista(
+id INT NOT NULL AUTO_INCREMENT
+,nome VARCHAR(200) NOT NULL UNIQUE
+,CPF VARCHAR(14) NOT NULL UNIQUE
+,endereço  VARCHAR(200) NOT NULL
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,cidade_id INT NOT NULL
+,departamento_id INT NOT NULL
+,CONSTRAINT pk_motorista PRIMARY KEY (id)
+,CONSTRAINT fk_motorista_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id)
+,CONSTRAINT fk_motorista_departamento FOREIGN KEY (departamento_id) REFERENCES departamento (id)
+,CONSTRAINT motorista_ativo_deve_ser_S_ou_N CHECK (ativo IN ('S', 'N'))
+);
+
+SELECT * FROM motorista;
+
+DROP TABLE IF EXISTS engenheiro;
+
+CREATE TABLE IF NOT EXISTS engenheiro(
+id INT NOT NULL AUTO_INCREMENT
+,nome VARCHAR(200) NOT NULL UNIQUE
+,CPF VARCHAR(14) NOT NULL UNIQUE
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,CONSTRAINT pk_engenheiro PRIMARY KEY (id)
+,CONSTRAINT engenheiro_ativo_deve_ser_S_ou_N CHECK (ativo IN ('S', 'N'))
+);
+
+SELECT * FROM engenheiro;
+
+DROP TABLE IF EXISTS caminhao;
+
+CREATE TABLE IF NOT EXISTS caminhao(
+id INT NOT NULL AUTO_INCREMENT
+,placa VARCHAR(7) NOT NULL UNIQUE
+,apelido VARCHAR(40) NOT NULL UNIQUE
+,tara INT NOT NULL
+,lotacao INT NOT NULL
+,peso_bruto INT NOT NULL
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,motorista_id INT NOT NULL
+,estado_id INT NOT NULL
+,CONSTRAINT pk_caminhao PRIMARY KEY (id)
+,CONSTRAINT fk_caminhao_motorista FOREIGN KEY (motorista_id) REFERENCES motorista (id)
+,CONSTRAINT fk_caminhao_estado FOREIGN KEY (estado_id) REFERENCES estado (id)
+,CONSTRAINT caminhao_ativo_deve_ser_S_ou_N CHECK (ativo IN ('S', 'N'))
+);
+
+SELECT * FROM caminhao;
+
+DROP TABLE IF EXISTS fabrica;
+
+CREATE TABLE IF NOT EXISTS fabrica(
+id INT NOT NULL AUTO_INCREMENT
+,nome VARCHAR(45) NOT NULL UNIQUE
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,CONSTRAINT pk_fabrica PRIMARY KEY (id)
+);
+
+SELECT * FROM fabrica;
+
+DROP TABLE IF EXISTS produto_fabrica;
+
+CREATE TABLE IF NOT EXISTS produto_fabrica(
+ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,fabrica_id INT NOT NULL
+,produto_id INT NOT NULL
+,CONSTRAINT fk_produto_fabrica_fabrica FOREIGN KEY (fabrica_id) REFERENCES fabrica (id)
+,CONSTRAINT fk_produto_fabrica_produto FOREIGN KEY (produto_id) REFERENCES produto (id)
+);
+
+SELECT * FROM produto_fabrica;
+
+DROP TABLE IF EXISTS produto;
+
+CREATE TABLE IF NOT EXISTS Produto(
+id INT NOT NULL AUTO_INCREMENT
+,nome VARCHAR(100) NOT NULL UNIQUE
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,preco_atual FLOAT NOT NULL
+,estoque INT NOT NULL
+,CONSTRAINT pk_produto PRIMARY KEY (id)
+);
+
+SELECT * FROM produto;
+
+DROP TABLE IF EXISTS venda;
+
+CREATE TABLE IF NOT EXISTS venda(
+id INT NOT NULL AUTO_INCREMENT
+,desconto INT NOT NULL
+,total_com_desconto FLOAT NOT NULL
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,cliente_id INT NOT NULL
+,funcionario_id INT NOT NULL
+,CONSTRAINT pk_venda PRIMARY KEY (id)
+,CONSTRAINT fk_venda_cliente FOREIGN KEY (cliente_id) REFERENCES cliente (id)
+,CONSTRAINT fk_venda_funcionario FOREIGN KEY (funcionario_id) REFERENCES funcionario (id)
+);
+
+SELECT * FROM venda;
+
+DROP TABLE IF EXISTS compra;
+
+CREATE TABLE IF NOT EXISTS compra(
+id INT NOT NULL AUTO_INCREMENT
+,desconto INT NOT NULL
+,total_com_desconto FLOAT NOT NULL
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,fornecedor_id INT NOT NULL
+,funcionario_id INT NOT NULL
+,CONSTRAINT pk_compra PRIMARY KEY (id)
+,CONSTRAINT fk_compra_fornecedor FOREIGN KEY (fornecedor_id) REFERENCES fornecedor (id)
+,CONSTRAINT fk_compra_funcionario FOREIGN KEY (funcionario_id) REFERENCES funcionario (id)
+);
+
+SELECT * FROM compra;
+
+DROP TABLE IF EXISTS obra;
+
+CREATE TABLE IF NOT EXISTS obra(
+id INT NOT NULL AUTO_INCREMENT
+,nome VARCHAR(45) NOT NULL UNIQUE
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,engenheiro_id INT NOT NULL
+,venda_id INT NOT NULL
+,CONSTRAINT pk_obra PRIMARY KEY (id)
+,CONSTRAINT fk_obra_venda FOREIGN KEY (venda_id) REFERENCES venda (id)
+,CONSTRAINT fk_obra_engenheiro FOREIGN KEY (engenheiro_id) REFERENCES engenheiro (id)
+);
+
+SELECT * FROM obra;
+
+DROP TABLE IF EXISTS itens_compra;
+
+CREATE TABLE IF NOT EXISTS itens_compra(
+quantidade INT NOT NULL
+,preco FLOAT NOT NULL
+,compra_id INT NOT NULL
+,produto_id INT NOT NULL
+,CONSTRAINT fk_itens_compra_compra FOREIGN KEY (compra_id) REFERENCES compra (id)
+,CONSTRAINT fk_itens_compra_produto FOREIGN KEY (produto_id) REFERENCES produto (id)
+);
+
+SELECT * FROM itens_compra;
+
+DROP TABLE IF EXISTS itens_venda;
+
+CREATE TABLE IF NOT EXISTS itens_venda(
+quantidade INT NOT NULL
+,preco FLOAT NOT NULL
+,venda_id INT NOT NULL
+,produto_id INT NOT NULL
+,CONSTRAINT fk_itens_venda_venda FOREIGN KEY (venda_id) REFERENCES venda (id)
+,CONSTRAINT fk_itens_venda_produto FOREIGN KEY (produto_id) REFERENCES produto (id)
+);
+
+SELECT * FROM itens_compra;
+
+DROP TABLE IF EXISTS itens_obra;
+
+CREATE TABLE IF NOT EXISTS itens_obra(
+id INT NOT NULL AUTO_INCREMENT
+,nome VARCHAR(45) NOT NULL UNIQUE
+,endereço VARCHAR(200) NOT NULL
+,ativo CHAR(1) NOT NULL DEFAULT 'S'
+,data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+,caminhao_id INT NOT NULL
+,funcionario_id INT NOT NULL
+,obra_id INT NOT NULL
+,cidade_id INT NOT NULL
+,produto_id INT NOT NULL
+,CONSTRAINT pk_itens_obra PRIMARY KEY (id)
+,CONSTRAINT fk_itens_obra_caminhao FOREIGN KEY (caminhao_id) REFERENCES caminhao (id)
+,CONSTRAINT fk_itens_obra_funcionario FOREIGN KEY (funcionario_id) REFERENCES funcionario (id)
+,CONSTRAINT fk_itens_obra_obra FOREIGN KEY (obra_id) REFERENCES obra (id)
+,CONSTRAINT fk_itens_obra_produto FOREIGN KEY (produto_id) REFERENCES produto (id)
+,CONSTRAINT fk_itens_obra_cidade FOREIGN KEY (cidade_id) REFERENCES cidade (id)
+);
+
+SELECT * FROM itens_obra;
+
+DROP TABLE IF EXISTS recebimento;
+
+CREATE TABLE IF NOT EXISTS recebimento(
+id INT NOT NULL
+,condicao VARCHAR(45) NOT NULL
+,valor VARCHAR(45) NOT NULL
+,numero_da_parcela INT NOT NULL
+,desconto VARCHAR(4) NOT NULL
+,juros VARCHAR(45) NOT NULL
+,total_final FLOAT NOT NULL
+,compra_id INT NOT NULL
+,CONSTRAINT pk_recebimento PRIMARY KEY (id)
+,CONSTRAINT fk_recebimento_compra FOREIGN KEY (compra_id) REFERENCES compra (id)
+);
+
+SELECT * FROM recebimento;
+
+DROP TABLE IF EXISTS pagamento;
+
+CREATE TABLE IF NOT EXISTS pagamento(
+id INT NOT NULL
+,condicao VARCHAR(45) NOT NULL
+,valor VARCHAR(45) NOT NULL
+,numero_da_parcela INT NOT NULL
+,desconto VARCHAR(4) NOT NULL
+,juros VARCHAR(45) NOT NULL
+,total_final FLOAT NOT NULL
+,venda_id INT NOT NULL
+,CONSTRAINT pk_pagamento PRIMARY KEY (id)
+,CONSTRAINT fk_pagamento_venda FOREIGN KEY (venda_id) REFERENCES venda (id)
+);
+
+SELECT * FROM pagamento;
+
+DROP TABLE IF EXISTS caixa;
+
+CREATE TABLE IF NOT EXISTS caixa(
+id INT NOT NULL
+,data_operacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+,condicao VARCHAR(45) NOT NULL
+,saldo FLOAT NOT NULL
+,funcionario_id INT NOT NULL
+,CONSTRAINT pk_caixa PRIMARY KEY (id)
+,CONSTRAINT fk_caixa_funcionario FOREIGN KEY (funcionario_id) REFERENCES funcionario (id)
+);
+
+SELECT * FROM caixa;
+
+DROP TABLE IF EXISTS item_caixa;
+
+CREATE TABLE IF NOT EXISTS item_caixa(
+id INT NOT NULL AUTO_INCREMENT
+,descricao VARCHAR(50) NOT NULL
+,valor FLOAT NOT NULL
+,natureza VARCHAR(45)
+,caixa_id INT NOT NULL
+,recebimento_id INT NOT NULL
+,pagamento_id INT NOT NULL
+,CONSTRAINT pk_item_caixa PRIMARY KEY (id)
+,CONSTRAINT fk_item_caixa_caixa FOREIGN KEY (caixa_id) REFERENCES caixa (id)
+,CONSTRAINT fk_item_caixa_pagamento FOREIGN KEY (pagamento_id) REFERENCES pagamento (id)
+,CONSTRAINT fk_item_caixa_recebimento FOREIGN KEY (recebimento_id) REFERENCES recebimento (id)
+);
+
+-- FALTA A INSERCAO DE DADOS -- 
